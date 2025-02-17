@@ -1,143 +1,100 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-#define TAMANHO 10
+typedef struct Celula {
+    int valor;
+    struct Celula *proximo;
+} Celula;
 
 typedef struct {
-    int valores[TAMANHO];
-    int n;
-} Lista;
+    Celula *primeiro;
+    int qtd;
+} LDE;
 
-/**
- * @brief Verifica se a lista está cheia.
- * 
- * @param lista Ponteiro para a lista.
- * @return int Retorna 1 se a lista estiver cheia, caso contrário, retorna 0.
- */
-int esta_cheia(Lista *lista) {
-    return TAMANHO == lista->n;
+Celula *criar_celula(int valor){
+    Celula *nova = malloc(sizeof(Celula));
+    nova->proximo = NULL;
+    nova->valor = valor;
+    return nova;
 }
 
-/**
- * @brief Verifica se a lista está vazia.
- * 
- * @param lista Ponteiro para a lista.
- * @return int Retorna 1 se a lista estiver vazia, caso contrário, retorna 0.
- */
-int esta_vazia(Lista *lista) {
-    return lista->n ==0;
+LDE *criar_lista(){
+    LDE *lista = malloc(sizeof(LDE));
+    lista->primeiro = NULL;
+    lista->qtd = 0;
+    return lista;
 }
 
-/**
- * @brief Encontra a posição onde um valor deve ser inserido na lista ordenada.
- * 
- * @param lista Ponteiro para a lista.
- * @param valor O valor a ser inserido.
- * @return int Retorna o índice onde o valor deve ser inserido.
- */
-int encontrar_posicao(Lista *lista, int valor) {
-    int idx = 0;
-    while(idx < lista -> n && valor > lista->valores[idx]){
-        idx++;
+void inserir(LDE *lista, int valor){
+    Celula *nova = criar_celula(valor);
+    Celula *anterior = NULL;
+    Celula *atual = lista->primeiro;
+    while(atual != NULL && atual->valor < nova->valor){
+        anterior = atual;
+        atual = atual->proximo;
     }
-    return idx;
+    if(anterior == NULL){
+        lista->primeiro = nova;
+    } else {
+        anterior->proximo = nova;
+    }
+    nova->proximo = atual;
+    lista->qtd++;
 }
 
-/**
- * @brief Move os elementos da lista para a direita a partir de um índice, criando espaço para um novo valor.
- * 
- * @param lista Ponteiro para a lista.
- * @param indice O índice a partir do qual os elementos serão movidos.
- */
-
-void deslocar_direita(Lista *lista, int indice) {
-    for(int idx = lista->n; idx > indice; idx --){
-        lista->valores[idx] = lista->valores[idx - 1];
+void remover(LDE *lista, int valor) {
+    Celula *anterior = NULL;
+    Celula *atual = lista->primeiro;
+    while (atual != NULL && atual->valor != valor){
+        anterior = atual;
+        atual = atual->proximo;
+    }
+    if (lista->primeiro==NULL){
+        return;
+    }
+    if (atual==NULL){
+        return;
+    }
+    if (anterior == NULL && atual != NULL){
+        lista->primeiro = atual->proximo;
+        lista->qtd--;
+        free(atual);
+        return;
+    }
+    if (anterior != NULL && atual != NULL){
+        anterior->proximo = atual->proximo;
+        lista->qtd--;
+        free(atual);
+        return;
+    }
+    if (lista->qtd == 0){
+        lista->primeiro == NULL;
+        lista->qtd--;
+        free(atual);
     }
 }
 
-/**
- * @brief Move os elementos da lista para a esquerda a partir de um índice, removendo um valor.
- * 
- * @param lista Ponteiro para a lista.
- * @param indice O índice a partir do qual os elementos serão movidos.
- */
-
-void deslocar_esquerda(Lista *lista, int indice) {
-    for(int idx = indice; idx < lista->n; idx ++){
-        lista->valores[idx] = lista->valores[idx + 1];
-    }
-}
-
-
-/**
- * @brief Insere um valor na lista em sua posição ordenada.
- * 
- * @param lista Ponteiro para a lista.
- * @param valor O valor a ser inserido.
- * @return int Retorna 1 se a inserção for bem-sucedida, ou 0 se a lista estiver cheia.
- */
-int inserir(Lista *lista, int valor) {
-    if(esta_cheia(lista)){
-        return -1;
-    }
-    int idx = encontrar_posicao(lista,valor);
-    deslocar_direita (lista, idx);
-    lista->valores[idx] = valor;
-    lista->n++;
-    return 1;
-}
-
-/**
- * @brief Remove um valor da lista.
- * 
- * @param lista Ponteiro para a lista.
- * @param valor O valor a ser removido.
- * @return int Retorna o valor removido se a remoção for bem-sucedida, ou -1 se a lista estiver vazia.
- */
-
-int remover(Lista *lista, int valor) {
-    if(esta_vazia(lista)){
-        return -1;
-    }
-    int idx = encontrar_posicao(lista,valor);
-    deslocar_esquerda (lista, idx);
-    lista->n--;
- return 1;
-}
-
-
-/**
- * @brief Exibe todos os valores da lista.
- * 
- * @param lista Ponteiro para a lista.
- */
-void exibir_lista(const Lista *lista) {
-    for(int x = 0; x < lista->n; x++) {
-        printf("%d ", lista->valores[x]);
+void mostrar(LDE *lista){
+    Celula *atual = lista->primeiro;
+    while(atual != NULL){
+        printf("%d ", atual->valor);
+        atual = atual->proximo;
     }
     printf("\n");
 }
 
-
-int main(void) {
-    Lista lista = { .n = 0 };
-    Lista *pl = &lista;
-    int valores[] = {21, 14, 13, 10, 87, 35, 27, 56, 85, 29};
-
-    for (int i = 0; i < TAMANHO; i++) {
-        inserir(pl, valores[i]);
-        exibir_lista(pl);
+int main(){
+    LDE *lista = criar_lista();
+    int num;
+    for(int i = 0; i < 10; i++){
+        scanf("%d", &num);
+        inserir(lista, num);
+        mostrar(lista);
     }
-
-    for (int i = 0; i < TAMANHO; i++) {
-        printf("O valor %d está na posição %d\n", valores[i], encontrar_posicao(pl, valores[i]));
+    for(int i = 0; i < 10; i++){
+        scanf("%d", &num);
+        remover(lista, num);
+        mostrar(lista);
     }
-
-    for (int i = 0; i < TAMANHO; i++) {
-        remover(pl, valores[i]);
-        exibir_lista(pl);
-    }
-
     return 0;
 }
-
