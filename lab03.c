@@ -10,7 +10,7 @@ typedef struct no {
 
 // Definição da estrutura da lista duplamente encadeada
 typedef struct lista_duplamente_encadeada {
-    int quantidade;
+    int quant;
     No *inicio;
 } ListaDuplamenteEncadeada;
 
@@ -22,7 +22,7 @@ typedef struct lista_duplamente_encadeada {
 ListaDuplamenteEncadeada *criar_lista() {
     ListaDuplamenteEncadeada *lista = malloc(sizeof(ListaDuplamenteEncadeada));
     lista->inicio = NULL;
-    lista->quantidade = 0;
+    lista->quant = 0;
     return lista;
 }
 
@@ -72,7 +72,7 @@ No *criar_no(int valor) {
         novo->proximo = atual;
         atual->anterior = novo;
     }
-    lista->quantidade++;
+    lista->quant++;
 }
 
 /**
@@ -99,14 +99,14 @@ void exibir_lista(ListaDuplamenteEncadeada *lista) {
  */
 void exibir_lista_invertida(ListaDuplamenteEncadeada *lista) {
     No *atual = lista->inicio;
-    while(atual != NULL){
-        atual = atual->anterior;
+    while(atual->proximo != NULL){
+        atual = atual->proximo;
     }
 
     printf("Final ->");
     while(atual != NULL){
         printf("%d ", atual->valor);
-        atual = atual->proximo;
+        atual = atual->anterior;
     }
     printf("<- Inicio");
     printf("\n");
@@ -119,7 +119,29 @@ void exibir_lista_invertida(ListaDuplamenteEncadeada *lista) {
  * @param valor O valor a ser removido da lista.
  */
 void remover_valor(ListaDuplamenteEncadeada *lista, int valor) {
-    
+    No *anterior = NULL;
+    No *atual = lista->inicio;
+    while (atual != NULL && atual->valor != valor){
+        anterior = atual;
+        atual = atual->proximo;
+    }
+
+    if (atual==NULL){
+        return;
+    }
+
+    if (anterior == NULL){
+        lista->inicio = atual->proximo;
+        if (lista->inicio != NULL)
+            lista->inicio->anterior = NULL;
+    } else{
+        anterior->proximo = atual->proximo;
+        if (atual->proximo != NULL){
+            atual->proximo->anterior = anterior;
+        }
+    }
+    free(atual);
+    lista->quant--;   
 }
 
 int main(void) {
